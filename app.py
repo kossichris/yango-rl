@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Streamlit app for driver repositioning RL simulation."""
 
+import sys
+import os
+from pathlib import Path
+
+# Add current directory to path
+sys.path.insert(0, str(Path(__file__).parent))
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 
 from env import CityEnv
 from agents.qlearning import QLearnAgent
