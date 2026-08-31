@@ -7,21 +7,42 @@ import matplotlib.pyplot as plt
 import sys
 import os
 from pathlib import Path
+import importlib.util
 
-# Add project root to path
+# Add project root to path for imports
 project_root = Path(__file__).parent.absolute()
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root))
+
+# Dynamically load modules
+def load_module(module_name, file_path):
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 try:
-    # Try importing from local modules
-    from env.city_env import CityEnv
-    from agents.qlearning import QLearnAgent
-    from agents.dqn import DQNAgent
-except (ImportError, ModuleNotFoundError) as e:
+    # Load local modules dynamically
+    env_module = load_module("env", str(project_root / "env" / "__init__.py"))
+    agents_module = load_module("agents", str(project_root / "agents" / "__init__.py"))
+
+    CityEnv = env_module.CityEnv
+    QLearnAgent = agents_module.QLearnAgent
+    DQNAgent = agents_module.DQNAgent
+
+except Exception as e:
     st.error(f"⚠️ Failed to import modules: {e}")
-    st.info("The app is loading the modules. If this persists, try refreshing the page.")
-    st.stop()
+    st.info("Trying to load modules directly...")
+    try:
+        # Fallback: load directly from files
+        sys.path.insert(0, str(project_root / "env"))
+        sys.path.insert(0, str(project_root / "agents"))
+        from city_env import CityEnv
+        from qlearning import QLearnAgent
+        from dqn import DQNAgent
+    except Exception as e2:
+        st.error(f"❌ Could not load modules: {e2}")
+        st.stop()
 
 
 st.set_page_config(
