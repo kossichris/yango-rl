@@ -4,18 +4,15 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
-import sys
 
-# Ensure project root is in path
-project_root = Path(__file__).parent.absolute()
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
-# Now import local modules
-from env.city_env import CityEnv
-from agents.qlearning import QLearnAgent
-from agents.dqn import DQNAgent
+try:
+    from env import CityEnv
+    from agents.qlearning import QLearnAgent
+    from agents.dqn import DQNAgent
+except ImportError as e:
+    st.error(f"Failed to import modules: {e}")
+    st.info("Make sure all packages are installed correctly.")
+    st.stop()
 
 
 st.set_page_config(
